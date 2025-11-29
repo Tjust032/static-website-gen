@@ -1,8 +1,8 @@
 import unittest
 
-from htmlnode import HTMLNode, LeafNode
+from htmlnode import HTMLNode, LeafNode, ParentNode
 
-class TestTextNode(unittest.TestCase):
+class TestHtmlNode(unittest.TestCase):
     def test_props_to_html(self):
         node_props = {
             "href": "https://www.google.com",
@@ -41,7 +41,28 @@ class TestTextNode(unittest.TestCase):
             node.to_html(),
             '<a href="https://www.google.com" target="_blank">Click me!</a>'
         )
-
+        
+    def test_to_html_with_children(self):
+        child_node = LeafNode("span", "child")
+        parent_node = ParentNode("div", [child_node])
+        self.assertEqual(parent_node.to_html(), "<div><span>child</span></div>")
+        
+    def test_to_html_with_grandchildren(self):
+        grandchild_node = LeafNode("b", "grandchild")
+        child_node = ParentNode("span", [grandchild_node])
+        parent_node = ParentNode("div", [child_node])
+        self.assertEqual(
+            parent_node.to_html(),
+            "<div><span><b>grandchild</b></span></div>",
+        )
+        
+    def test_to_html_no_children(self):
+        parent_node = ParentNode("div", None)
+        
+        with self.assertRaises(ValueError) as cm:
+            parent_node.to_html()
+        self.assertEqual(str(cm.exception), "No children in parent node")
+    
 if __name__ == "__main__":
     unittest.main()
         
